@@ -1,0 +1,24 @@
+{
+	"name": "berrys-company-whatsapp-bot",
+	"version": "1.0.0",
+	"description": "Whatsapp bot for Berrys Company",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"start": "rm -rf ./dist .wwebjs_auth .wwebjs_cache && npx tsc &&  node ./dist",
+		"dev": "rm -rf .wwebjs_auth .wwebjs_cache && nodemon --exec ts-node ./src"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"dotenv": "^16.4.7",
+		"qrcode-terminal": "^0.12.0",
+		"whatsapp-web.js": "^1.26.0"
+	},
+	"devDependencies": {
+		"@types/node": "^22.13.10",
+		"nodemon": "^3.1.9",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.2"
+	}
+}
