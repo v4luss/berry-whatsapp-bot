@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
 	mode: 'production', // or 'development'
-	entry: './dist/index.js', // Entry point after TypeScript compilation
+	entry: './src/index.ts', // Entry point after TypeScript compilation
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'public'), // Output to the 'public' directory
@@ -16,6 +16,7 @@ module.exports = {
 				test: /\.ts$/, // Handle TypeScript files
 				use: 'ts-loader',
 				exclude: /node_modules/,
+				include: [path.resolve(__dirname, 'src')],
 			},
 		],
 	},

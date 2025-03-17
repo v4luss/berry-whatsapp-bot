@@ -28,8 +28,7 @@ jobs:
                         - name: Install Node.js Dependencies
                           run: |
                                   npm install 
-                                  npm install --save-dev webpack-cli ts-loader typescript webpack utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest
-                                  npm install whatsapp-web.js@latest
+                                  npm install utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest whatsapp-web.js@latest
 
                         - name: Fix Vulnerabilities
                           run: npm audit fix --force
@@ -43,6 +42,6 @@ jobs:
 
                         - name: Run Webpack
                           run: webpack --config webpack.config.js
-                        
+
                         - name: Fix Vulnerabilities
                           run: npm audit fix --force
