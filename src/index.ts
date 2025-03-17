@@ -46,12 +46,12 @@ const client: Client = new Client({
 });
 let berrysCompanyGroup: any;
 let strategy = new Strategy(presentationNode);
-
+let img;
 client.on('qr', async (qr: string) => {
 	qrcode.generate(qr, { small: true });
 	const qrImageUrl = await QRCode.toDataURL(qr);
 
-	// Log the QR code URL (you can upload this to a cloud service)
+	img = qrImageUrl;
 	console.log('QR Code URL:', qrImageUrl);
 });
 
@@ -134,7 +134,7 @@ client.on('message_create', async (message: any) => {
 client.initialize();
 
 app.get('/', (req: any, res: any, next: any) => {
-	res.send('Hello, World!');
+	res.send(img);
 });
 
 app.listen(port, () => {
