@@ -28,7 +28,7 @@ jobs:
                         - name: Install Node.js Dependencies
                           run: |
                                   npm install 
-                                  npm install utf-8-validate@6.0.5 bufferutil@4.0.9 rimraf@6.0.1 glob@11.0.1 puppeteer@24.4.0 whatsapp-web.js@1.26.0
+                                  npm install utf-8-validate@6.0.5 bufferutil@4.0.9 rimraf@6.0.1 glob@11.0.1 puppeteer@18.1.0 whatsapp-web.js@1.26.1-alpha.0
 
                         - name: Fix Vulnerabilities
                           run: npm audit fix --force
