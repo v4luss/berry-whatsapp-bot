@@ -9,6 +9,55 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+name: NodeJS with Webpack
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Dependencies
+        run: |
+          npm install --save-dev webpack-cli ts-loader typescript webpack
+          npm install utf-8-validate bufferutil
+          npm install
+
+      - name: Install FFmpeg
+        run: sudo apt-get install ffmpeg
+
+      - name: Clean Directories
+        run: |
+          rm -rf ./public .wwebjs_auth .wwebjs_cache
+
+      - name: Compile TypeScript
+        run: npx tsc
+
+      - name: Run Webpack
+        run: webpack --config webpack.config.js
+
+      - name: Fix Deprecation Warnings and Vulnerabilities
+        run: |
+          npm install rimraf@latest --save-dev
+          npm install glob@latest --save-dev
+          npm install puppeteer@latest --save-dev
+          npm audit fix --force
 
     strategy:
       matrix:
