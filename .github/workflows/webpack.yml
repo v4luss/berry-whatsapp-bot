@@ -27,12 +27,8 @@ jobs:
 
       - name: Install Node.js Dependencies
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
           npm install --save-dev webpack-cli ts-loader typescript webpack utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest
+          npm install whatsapp-web.js@latest
 
       - name: Fix Vulnerabilities
         run: npm audit fix --force
@@ -43,8 +39,6 @@ jobs:
 
       - name: Compile TypeScript
         run: npx tsc
-        # Verify that the dist/ directory is created
-        if: ${{ !failure() }}
 
       - name: Run Webpack
         run: webpack --config webpack.config.js
