@@ -4,10 +4,10 @@
 	"description": "Whatsapp bot for Berrys Company",
 	"main": "index.js",
 	"scripts": {
-		"build": "rm -rf ./dist .wwebjs_auth .wwebjs_cache && npx tsc",
+		"build": "rm -rf dist .wwebjs_auth .wwebjs_cache && npx tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "node ./dist",
-		"dev": "rm -rf .wwebjs_auth .wwebjs_cache && nodemon --exec ts-node ./src/index.ts"
+		"start": "node dist/index.js",
+		"dev": "rm -rf .wwebjs_auth .wwebjs_cache && nodemon --exec ts-node src/index.ts"
 	},
 	"author": "",
 	"license": "ISC",
