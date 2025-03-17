@@ -98,7 +98,6 @@ client.on('ready', async () => {
 		const group = await client.createGroup('Berry Company Chat', [
 			client.info.wid._serialized,
 		]);
-		console.log('Group created:', group.id._serialized);
 	} catch (e) {
 		console.log('Erro ao criar grupo:', e);
 	}
