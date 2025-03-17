@@ -7,11 +7,12 @@ import apresentacao from './apresentacao';
 import * as dotenv from 'dotenv';
 import QRCode from 'qrcode';
 const express = require('express');
+const qrcode = require('qrcode-terminal');
 const app = express();
 const port = process.env.PORT || 3000;
 
 dotenv.config();
-const qrcode = require('qrcode-terminal');
+
 const inputOptions = [
 	'iniciar',
 	'voltar',
@@ -65,7 +66,7 @@ client.on('ready', async () => {
 		console.log('Erro ao criar grupo.');
 	}
 });
-client.on('message_create', async (message) => {
+client.on('message_create', async (message: any) => {
 	if (message.body.toLowerCase() == 'iniciar') {
 		strategy = new Strategy(presentationNode);
 	}
@@ -132,7 +133,7 @@ client.on('message_create', async (message) => {
 });
 client.initialize();
 
-app.get('/', (req, res) => {
+app.get('/', (req: any, res: any, next: any) => {
 	res.send('Hello, World!');
 });
 
