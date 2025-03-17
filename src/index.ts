@@ -131,10 +131,10 @@ client.on('message_create', async (message: any) => {
 
 		client.sendMessage(
 			(await message.getChat()).id._serialized,
-			'Vamos botar você em contato com um de nossos assistentes! Obrigado por escolher a Berry Company!',
+			`Para entrar em contato com um de nossos atendentes, encaminhe uma mensagem para ${process.env.CALLBACK_PHONE_NUMBER} com o titulo "${strategy.currentNode.title}", obrigado!`,
 		);
 		// Sending message.
-		client.sendMessage(chatId, text);
+		// client.sendMessage(chatId, text);
 	}
 });
 client.initialize();
