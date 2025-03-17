@@ -5,6 +5,11 @@ import presentationNode from './apresentacao';
 import Strategy from './services/Strategy';
 import apresentacao from './apresentacao';
 import * as dotenv from 'dotenv';
+import QRCode from 'qrcode';
+const express = require('express');
+const app = express();
+const port = process.env.PORT || 3000;
+
 dotenv.config();
 const qrcode = require('qrcode-terminal');
 const inputOptions = [
@@ -41,9 +46,14 @@ const client: Client = new Client({
 let berrysCompanyGroup: any;
 let strategy = new Strategy(presentationNode);
 
-client.on('qr', (qr: string) => {
+client.on('qr', async (qr: string) => {
 	qrcode.generate(qr, { small: true });
+	const qrImageUrl = await QRCode.toDataURL(qr);
+
+	// Log the QR code URL (you can upload this to a cloud service)
+	console.log('QR Code URL:', qrImageUrl);
 });
+
 client.on('ready', async () => {
 	console.log('Client is ready.');
 	try {
@@ -121,3 +131,11 @@ client.on('message_create', async (message) => {
 	}
 });
 client.initialize();
+
+app.get('/', (req, res) => {
+	res.send('Hello, World!');
+});
+
+app.listen(port, () => {
+	console.log(`Server is running on http://localhost:${port}`);
+});
