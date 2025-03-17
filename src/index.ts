@@ -1,4 +1,10 @@
-import WAWebJS, { Chat, Client, Message, LocalAuth } from 'whatsapp-web.js';
+import WAWebJS, {
+	Chat,
+	Client,
+	Message,
+	LocalAuth,
+	NoAuth,
+} from 'whatsapp-web.js';
 import { createBerrysCompanyGroup, startChat } from './services/GroupService';
 import { CurrentNode } from './models/CurrentNode';
 import presentationNode from './apresentacao';
@@ -39,7 +45,7 @@ const nodesForwardAssistance = [
 	'Financeiro',
 ];
 const client: Client = new Client({
-	authStrategy: new LocalAuth(),
+	authStrategy: new NoAuth(),
 	puppeteer: {
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	},
