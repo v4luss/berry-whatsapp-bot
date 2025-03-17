@@ -12,6 +12,7 @@ import Strategy from './services/Strategy';
 import apresentacao from './apresentacao';
 import * as dotenv from 'dotenv';
 import QRCode from 'qrcode';
+const fs = require('fs');
 const express = require('express');
 const qrcode = require('qrcode-terminal');
 const app = express();
@@ -44,8 +45,17 @@ const nodesForwardAssistance = [
 	'Web Sites',
 	'Financeiro',
 ];
+const SESSION_FILE_PATH = './session.json';
+
+// Load session data if it exists
+let sessionData;
+if (fs.existsSync(SESSION_FILE_PATH)) {
+	sessionData = require(SESSION_FILE_PATH);
+}
+
 const client: Client = new Client({
 	authStrategy: new LocalAuth(),
+	session: sessionData,
 	puppeteer: {
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	},
@@ -53,6 +63,10 @@ const client: Client = new Client({
 let berrysCompanyGroup: any;
 let strategy = new Strategy(presentationNode);
 let img;
+client.on('authenticated', (session) => {
+	fs.writeFileSync(SESSION_FILE_PATH, JSON.stringify(session));
+	console.log('Session saved to session.json');
+});
 client.on('qr', async (qr: string) => {
 	qrcode.generate(qr, { small: true });
 	const qrImageUrl = await QRCode.toDataURL(qr);
