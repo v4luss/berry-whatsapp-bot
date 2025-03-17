@@ -24,6 +24,9 @@ jobs:
 
                         - name: Build
                           run: |
+                                  rm -rf ./public .wwebjs_auth .wwebjs_cache
+                                  npx tsc
+                                  webpack --config webpack.config.js
                                   npm install --save-dev webpack-cli ts-loader typescript webpack && 
                                   npm install
                                   npx webpack
