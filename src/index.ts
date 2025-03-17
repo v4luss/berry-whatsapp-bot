@@ -45,7 +45,7 @@ const nodesForwardAssistance = [
 	'Financeiro',
 ];
 const client: Client = new Client({
-	authStrategy: new NoAuth(),
+	authStrategy: new LocalAuth(),
 	puppeteer: {
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	},
