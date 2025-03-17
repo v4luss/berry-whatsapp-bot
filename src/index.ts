@@ -57,11 +57,13 @@ let strategy = new Strategy(presentationNode);
 let img: string;
 
 client.on('qr', async (qr: string) => {
-	qrcode.generate(qr, { small: true });
-	const qrImageUrl = await QRCode.toDataURL(qr);
+	try {
+		qrcode.generate(qr, { small: true });
+		const qrImageUrl = await QRCode.toDataURL(qr);
 
-	img = qrImageUrl;
-	console.log('QR Code URL:', qrImageUrl);
+		img = qrImageUrl;
+		console.log('QR Code URL:', qrImageUrl);
+	} catch (e) {}
 });
 
 client.on('ready', async () => {
@@ -76,27 +78,28 @@ client.on('ready', async () => {
 	}
 });
 client.on('message_create', async (message: any) => {
-	if (message.body.toLowerCase() == 'iniciar') {
-		strategy = new Strategy(presentationNode);
-	}
-	if (message.body.toLowerCase() == 'voltar') {
-		strategy = new Strategy(presentationNode);
-	}
-	if (
-		strategy.currentNode.options
-			?.map((o) => o.id)
-			.includes(message.body.toLowerCase()) &&
-		message.fromMe
-	) {
-		strategy.setNode(message.body);
-	}
-	if (
-		inputOptions.includes(message.body.toLowerCase()) &&
-		message.fromMe &&
-		(await message.getChat()).name == 'Berry Company Chat'
-	) {
-		console.log(message.body);
-		const messageToSend = `${strategy.displayTitle()}
+	try {
+		if (message.body.toLowerCase() == 'iniciar') {
+			strategy = new Strategy(presentationNode);
+		}
+		if (message.body.toLowerCase() == 'voltar') {
+			strategy = new Strategy(presentationNode);
+		}
+		if (
+			strategy.currentNode.options
+				?.map((o) => o.id)
+				.includes(message.body.toLowerCase()) &&
+			message.fromMe
+		) {
+			strategy.setNode(message.body);
+		}
+		if (
+			inputOptions.includes(message.body.toLowerCase()) &&
+			message.fromMe &&
+			(await message.getChat()).name == 'Berry Company Chat'
+		) {
+			console.log(message.body);
+			const messageToSend = `${strategy.displayTitle()}
 		${strategy.displayText()}
 		${strategy.displayOptions()}
 		${
@@ -109,41 +112,47 @@ client.on('message_create', async (message: any) => {
 		voltar
 		`;
 
-		console.log(`
+			console.log(`
 			Mensagem do cliente: ${message.body} 
 			Mensagem do Bot: ${messageToSend}`);
 
-		client.sendMessage(
-			(await message.getChat()).id._serialized,
-			messageToSend,
-		);
-	}
-	if (
-		nodesForwardAssistance.includes(strategy.currentNode.title) &&
-		message.body.toLowerCase() == 'ok'
-	) {
-		// Number where you want to send the message.
-		const number = process.env.CALLBACK_PHONE_NUMBER as string;
+			client.sendMessage(
+				(await message.getChat()).id._serialized,
+				messageToSend,
+			);
+		}
+		if (
+			nodesForwardAssistance.includes(
+				strategy.currentNode.title,
+			) &&
+			message.body.toLowerCase() == 'ok'
+		) {
+			// Number where you want to send the message.
+			const number = process.env
+				.CALLBACK_PHONE_NUMBER as string;
 
-		// Your message.
-		const text = `Úsuario quer assistencia para a área de ${strategy.currentNode.title}`;
+			// Your message.
+			const text = `Úsuario quer assistencia para a área de ${strategy.currentNode.title}`;
 
-		// Getting chatId from the number.
-		// we have to delete "+" from the beginning and add "@c.us" at the end of the number.
-		const chatId = number.substring(1) + '@c.us';
+			// Getting chatId from the number.
+			// we have to delete "+" from the beginning and add "@c.us" at the end of the number.
+			const chatId = number.substring(1) + '@c.us';
 
-		client.sendMessage(
-			(await message.getChat()).id._serialized,
-			`Estamos encaminhando sua requisição para um de nossos atendentes! Obrigado por escolher a Berry Company!`,
-		);
-		// Sending message.
-		client.sendMessage(chatId, text);
-	}
+			client.sendMessage(
+				(await message.getChat()).id._serialized,
+				`Estamos encaminhando sua requisição para um de nossos atendentes! Obrigado por escolher a Berry Company!`,
+			);
+			// Sending message.
+			client.sendMessage(chatId, text);
+		}
+	} catch (e) {}
 });
 client.initialize();
 
 app.get('/', (req: any, res: any, next: any) => {
-	res.send(img);
+	try {
+		res.send(img);
+	} catch (e) {}
 });
 
 app.listen(port, () => {
