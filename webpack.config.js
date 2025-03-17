@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
 	mode: 'production', // or 'development'
-	entry: './public/index.js', // Entry point after TypeScript compilation
+	entry: './dist/index.js', // Entry point after TypeScript compilation
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'public'), // Output to the 'public' directory
