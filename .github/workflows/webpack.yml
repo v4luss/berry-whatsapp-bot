@@ -71,14 +71,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install Dependencies
-        run: |
-          npm install --save-dev webpack-cli ts-loader typescript webpack
-          npm install utf-8-validate bufferutil
-          npm install
-
-      - name: Install FFmpeg
+      - name: Install System Dependencies
         run: sudo apt-get install ffmpeg
+
+      - name: Install Node.js Dependencies
+        run: |
+          npm install --save-dev webpack-cli ts-loader typescript webpack utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest
+          npm install whatsapp-web.js@latest
+
+      - name: Fix Vulnerabilities
+        run: npm audit fix --force
 
       - name: Clean Directories
         run: |
@@ -89,10 +91,3 @@ jobs:
 
       - name: Run Webpack
         run: webpack --config webpack.config.js
-
-      - name: Fix Deprecation Warnings and Vulnerabilities
-        run: |
-          npm install rimraf@latest --save-dev
-          npm install glob@latest --save-dev
-          npm install puppeteer@latest --save-dev
-          npm audit fix --force
