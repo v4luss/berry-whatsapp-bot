@@ -12,7 +12,7 @@ import Strategy from './services/Strategy';
 import apresentacao from './apresentacao';
 import * as dotenv from 'dotenv';
 import QRCode from 'qrcode';
-import { MongoClient } from 'mongodb';
+const fs = require('fs');
 const express = require('express');
 const qrcode = require('qrcode-terminal');
 const app = express();
@@ -46,48 +46,20 @@ const nodesForwardAssistance = [
 	'Financeiro',
 ];
 
-// MongoDB setup
-const uri = process.env.MONGODB_URI;
-const mongoClient = new MongoClient(uri);
-
-async function loadSession() {
-	await mongoClient.connect();
-	const db = mongoClient.db('whatsapp_bot');
-	const sessions = db.collection('sessions');
-	const sessionData = await sessions.findOne({ id: 'whatsapp_session' });
-	return sessionData ? sessionData.data : null;
-}
-
-async function saveSession(session) {
-	const db = mongoClient.db('whatsapp_bot');
-	const sessions = db.collection('sessions');
-	await sessions.updateOne(
-		{ id: 'whatsapp_session' },
-		{ $set: { data: session } },
-		{ upsert: true },
-	);
-}
-
-const client = new Client({
-	authStrategy: new NoAuth(), // Force QR code generation
-	session: await loadSession(),
+const client: Client = new Client({
+	authStrategy: new LocalAuth(),
 	puppeteer: {
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	},
 });
-
 let berrysCompanyGroup: any;
 let strategy = new Strategy(presentationNode);
-let img;
-
-client.on('authenticated', async (session) => {
-	await saveSession(session);
-	console.log('Session saved to MongoDB');
-});
+let img: string;
 
 client.on('qr', async (qr: string) => {
 	qrcode.generate(qr, { small: true });
 	const qrImageUrl = await QRCode.toDataURL(qr);
+
 	img = qrImageUrl;
 	console.log('QR Code URL:', qrImageUrl);
 });
@@ -95,19 +67,19 @@ client.on('qr', async (qr: string) => {
 client.on('ready', async () => {
 	console.log('Client is ready.');
 	try {
-		const group = await client.createGroup('Berry Company Chat', [
+		client.createGroup(
+			'Berry Company Chat',
 			client.info.wid._serialized,
-		]);
+		);
 	} catch (e) {
-		console.log('Erro ao criar grupo:', e);
+		console.log('Erro ao criar grupo.');
 	}
 });
-
 client.on('message_create', async (message: any) => {
-	if (
-		message.body.toLowerCase() == 'iniciar' ||
-		message.body.toLowerCase() == 'voltar'
-	) {
+	if (message.body.toLowerCase() == 'iniciar') {
+		strategy = new Strategy(presentationNode);
+	}
+	if (message.body.toLowerCase() == 'voltar') {
 		strategy = new Strategy(presentationNode);
 	}
 	if (
@@ -123,16 +95,24 @@ client.on('message_create', async (message: any) => {
 		message.fromMe &&
 		(await message.getChat()).name == 'Berry Company Chat'
 	) {
+		console.log(message.body);
 		const messageToSend = `${strategy.displayTitle()}
-        ${strategy.displayText()}
-        ${strategy.displayOptions()}
-        ${
-		nodesForwardAssistance.includes(strategy.currentNode.title)
-			? 'Digite "ok" para falar com um assistente.'
-			: ''
-	}
-        voltar
-        `;
+		${strategy.displayText()}
+		${strategy.displayOptions()}
+		${
+			nodesForwardAssistance.includes(
+				strategy.currentNode.title,
+			)
+				? 'Digite "ok" para falar com um assistente.'
+				: ''
+		}
+		voltar
+		`;
+
+		console.log(`
+			Mensagem do cliente: ${message.body} 
+			Mensagem do Bot: ${messageToSend}`);
+
 		client.sendMessage(
 			(await message.getChat()).id._serialized,
 			messageToSend,
@@ -142,27 +122,31 @@ client.on('message_create', async (message: any) => {
 		nodesForwardAssistance.includes(strategy.currentNode.title) &&
 		message.body.toLowerCase() == 'ok'
 	) {
+		// Number where you want to send the message.
 		const number = process.env.CALLBACK_PHONE_NUMBER as string;
+
+		// Your message.
+		const text = `Úsuario quer assistencia para a área de ${strategy.currentNode.title}`;
+
+		// Getting chatId from the number.
+		// we have to delete "+" from the beginning and add "@c.us" at the end of the number.
 		const chatId = number.substring(1) + '@c.us';
+
 		client.sendMessage(
 			(await message.getChat()).id._serialized,
-			`Para entrar em contato com um de nossos atendentes, encaminhe uma mensagem para ${process.env.CALLBACK_PHONE_NUMBER} com o titulo "${strategy.currentNode.title}", obrigado!`,
+			`Estamos encaminhando sua requisição para um de nossos atendentes! Obrigado por escolher a Berry Company!`,
 		);
+		// Sending message.
+		client.sendMessage(chatId, text);
 	}
 });
-
 client.initialize();
 
-app.get('/', (req, res) => {
-	if (img) {
-		res.send(`<img src="${img}" alt="QR Code" />`);
-	} else {
-		res.send('Waiting for QR code...');
-	}
+app.get('/', (req: any, res: any, next: any) => {
+	res.send(img);
 });
 
 app.listen(port, () => {
 	console.log(`Server is running on http://localhost:${port}`);
 });
-
 module.exports = app;
