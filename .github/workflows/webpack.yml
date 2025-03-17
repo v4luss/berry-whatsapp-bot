@@ -27,7 +27,11 @@ jobs:
 
       - name: Install Node.js Dependencies
         run: |
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
           npm install --save-dev webpack-cli ts-loader typescript webpack utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest
 
       - name: Fix Vulnerabilities
