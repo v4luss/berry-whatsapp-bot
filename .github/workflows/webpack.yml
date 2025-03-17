@@ -25,7 +25,11 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install --save-dev webpack-cli ts-loader typescript webpack
+          npm install utf-8-validate bufferutil
           npm install
+
+      - name: Install FFmpeg
+        run: sudo apt-get install ffmpeg
 
       - name: Clean Directories
         run: |
@@ -33,8 +37,6 @@ jobs:
 
       - name: Compile TypeScript
         run: npx tsc
-        # Verify that the dist/ directory is created
-        if: ${{ !failure() }}
 
       - name: Run Webpack
         run: webpack --config webpack.config.js
