@@ -27,6 +27,7 @@ jobs:
 
                         - name: Install Node.js Dependencies
                           run: |
+                                  npm install 
                                   npm install --save-dev webpack-cli ts-loader typescript webpack utf-8-validate bufferutil rimraf@latest glob@latest puppeteer@latest
                                   npm install whatsapp-web.js@latest
 
@@ -35,10 +36,13 @@ jobs:
 
                         - name: Clean Directories
                           run: |
-                                  rm -rf ./public .wwebjs_auth .wwebjs_cache
+                                  rm -rf ./public ./dist .wwebjs_auth .wwebjs_cache
 
                         - name: Compile TypeScript
                           run: npx tsc
 
                         - name: Run Webpack
                           run: webpack --config webpack.config.js
+                        
+                        - name: Fix Vulnerabilities
+                          run: npm audit fix --force
