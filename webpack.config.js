@@ -20,4 +20,10 @@ module.exports = {
 		],
 	},
 	target: 'node', // Ensure Webpack bundles for Node.js
+	externals: {
+		// Exclude optional dependencies
+		'utf-8-validate': 'commonjs utf-8-validate',
+		bufferutil: 'commonjs bufferutil',
+		'fluent-ffmpeg': 'commonjs fluent-ffmpeg',
+	},
 };
