@@ -45,10 +45,10 @@ const port = process.env.PORT || 3000;
 // Handle QR Code generation
 client.on('qr', async (qr: string) => {
 	try {
-		qrcode.generate(qr, { small: true });
+		// qrcode.generate(qr, { small: true });
 		const qrImageUrl = await QRCode.toDataURL(qr);
 		img = qrImageUrl;
-		console.log('QR Code URL:', qrImageUrl);
+		// console.log('QR Code URL:', qrImageUrl);
 	} catch (error) {
 		berrysCompanyGroup = undefined;
 		console.error('Error generating QR code:', error);
