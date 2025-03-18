@@ -36,7 +36,7 @@ const client: Client = new Client({
 
 let berrysCompanyGroup: WAWebJS.CreateGroupResult | undefined;
 let strategy = new Strategy(presentationNode);
-let img: string;
+let img: string = '';
 
 // Initialize Express app
 const app = express();
