@@ -1,12 +1,13 @@
-import WAWebJS, { Chat, Client, Message, LocalAuth } from 'whatsapp-web.js';
+import WAWebJS, { Client, LocalAuth } from 'whatsapp-web.js';
 import { CurrentNode } from './models/CurrentNode';
 import presentationNode from './apresentacao';
 import Strategy from './services/Strategy';
 import * as dotenv from 'dotenv';
 import QRCode from 'qrcode';
-import fs from 'fs';
 import express from 'express';
 import qrcode from 'qrcode-terminal';
+import fs from 'fs-extra'; // Use fs-extra for recursive directory deletion
+import path from 'path'; // For handling file paths
 
 dotenv.config();
 
@@ -28,7 +29,6 @@ const client: Client = new Client({
 	authStrategy: new LocalAuth({
 		dataPath: './.wwebjs_auth', // Custom path for session data
 	}),
-
 	puppeteer: {
 		args: ['--no-sandbox', '--disable-setuid-sandbox'],
 	},
@@ -45,9 +45,7 @@ const port = process.env.PORT || 3000;
 // Handle QR Code generation
 client.on('qr', async (qr: string) => {
 	try {
-		// qrcode.generate(qr, { small: true });
 		img = qr;
-		// console.log('QR Code URL:', qrImageUrl);
 	} catch (error) {
 		berrysCompanyGroup = undefined;
 		console.error('Error generating QR code:', error);
@@ -82,8 +80,26 @@ client.on('ready', async () => {
 	}
 });
 
+// Handle messages
 client.on('message_create', async (message: any) => {
 	try {
+		if (message.body.toLowerCase() == 'sair') {
+			// Send farewell message
+			await client.sendMessage(
+				(
+					await message.getChat()
+				).id._serialized,
+				'Obrigado por falar conosco! Até a próxima!',
+			);
+
+			// Add a delay to ensure the message is sent
+			await new Promise((resolve) =>
+				setTimeout(resolve, 2000),
+			); // 2-second delay
+
+			// Log out
+			await logout();
+		}
 		if (message.body.toLowerCase() == 'iniciar') {
 			strategy = new Strategy(presentationNode);
 			console.log(message.body);
@@ -97,7 +113,8 @@ client.on('message_create', async (message: any) => {
 				? 'Digite "ok" para falar com um assistente.'
 				: ''
 		}
-		voltar
+		Para voltar digite: voltar
+		Para finalizar sessão, digite: sair
 		`;
 
 			console.log(`
@@ -122,7 +139,8 @@ client.on('message_create', async (message: any) => {
 				? 'Digite "ok" para falar com um assistente.'
 				: ''
 		}
-		voltar
+		Para voltar digite: voltar
+		Para finalizar sessão, digite: sair
 		`;
 
 			console.log(`
@@ -158,7 +176,8 @@ client.on('message_create', async (message: any) => {
 				? 'Digite "ok" para falar com um assistente.'
 				: ''
 		}
-		voltar
+		Para voltar digite: voltar
+		Para finalizar sessão, digite: sair
 		`;
 
 			console.log(`
@@ -193,37 +212,60 @@ client.on('message_create', async (message: any) => {
 			);
 			// Sending message.
 			client.sendMessage(chatId, text);
+			await logout(); // Use the logout function
 		}
 	} catch (e) {
 		berrysCompanyGroup = undefined;
 		console.error('Error handling message:', e);
+		await logout(); // Use the logout function
 	}
 });
 
 // Handle client disconnection
-client.on('disconnected', (reason) => {
+client.on('disconnected', async (reason) => {
 	console.log('Client disconnected:', reason);
-	berrysCompanyGroup = undefined; // Reset the group variable
-	// Reinitialize the client after a delay
-	setTimeout(() => {
-		client.destroy().then(() => client.initialize());
-	}, 5000);
+	await logout(); // Use the logout function
 });
 
 // Handle logout event
-client.on('logout', () => {
-	console.log('Client logged out.');
-	berrysCompanyGroup = undefined; // Reset the group variable
-	// Reinitialize the client
-	client.destroy().then(() => client.initialize());
+client.on('logout', async () => {
+	await logout(); // Use the logout function
 });
+
+// Graceful logout function
+async function logout() {
+	console.log('Client logged out.');
+	berrysCompanyGroup = undefined;
+
+	// Gracefully destroy the client
+	try {
+		await client.destroy();
+		console.log('Client destroyed gracefully.');
+	} catch (error) {
+		console.error('Error destroying client:', error);
+	}
+
+	// Clean up session directory
+	const sessionPath = './.wwebjs_auth'; // Correct path
+	try {
+		await fs.remove(sessionPath); // Recursively delete the session directory
+		console.log('Session directory cleaned up.');
+	} catch (error) {
+		console.error('Error cleaning up session directory:', error);
+	}
+
+	// Reinitialize the client after a delay
+	setTimeout(() => {
+		client.initialize();
+	}, 10000); // Increase delay to 10 seconds
+}
 
 // Initialize the client with error handling
 const initializeClient = () => {
 	client.initialize().catch((error) => {
 		console.error('Error initializing client:', error);
 		// Retry initialization after a delay
-		setTimeout(initializeClient, 5000);
+		setTimeout(initializeClient, 10000); // Increase delay to 10 seconds
 	});
 };
 
@@ -232,11 +274,19 @@ initializeClient();
 // Serve QR code image
 app.get('/', async (req, res) => {
 	try {
-		qrcode.generate(img, { small: true });
+		if (!img) {
+			// If img is not set, return a placeholder or error message
+			return res
+				.status(200)
+				.send(
+					'QR code not yet available. Please try again later.',
+				);
+		}
 
-		res.send(await QRCode.toDataURL(img));
+		// Generate the QR code data URL
+		const qrCodeDataUrl = await QRCode.toDataURL(img);
+		res.send(qrCodeDataUrl);
 	} catch (error) {
-		berrysCompanyGroup = undefined;
 		console.error('Error serving QR code:', error);
 		res.status(500).send('Internal Server Error');
 	}
