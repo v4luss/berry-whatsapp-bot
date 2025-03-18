@@ -46,8 +46,7 @@ const port = process.env.PORT || 3000;
 client.on('qr', async (qr: string) => {
 	try {
 		// qrcode.generate(qr, { small: true });
-		const qrImageUrl = await QRCode.toDataURL(qr);
-		img = qrImageUrl;
+		img = qr;
 		// console.log('QR Code URL:', qrImageUrl);
 	} catch (error) {
 		berrysCompanyGroup = undefined;
@@ -231,9 +230,11 @@ const initializeClient = () => {
 initializeClient();
 
 // Serve QR code image
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
 	try {
-		res.send(img);
+		qrcode.generate(img, { small: true });
+
+		res.send(await QRCode.toDataURL(img));
 	} catch (error) {
 		berrysCompanyGroup = undefined;
 		console.error('Error serving QR code:', error);
